@@ -78,6 +78,14 @@ trap(struct trapframe *tf)
     lapiceoi();
     break;
 
+  case T_PGFLT:
+    while(rcr2() < (KERNBASE - 1 - (myproc()->sTop))){
+	cprintf("Stack expanding.\n");
+	myproc()->sTop += PGSIZE;
+	allocuvm(myproc()->pgdir, PGROUNDDOWN(KERNBASE - 1 - (myproc()->sTop)), KERNBASE - 1 - (myproc()->sTop));
+    }
+    break;
+
   //PAGEBREAK: 13
   default:
     if(myproc() == 0 || (tf->cs&3) == 0){
